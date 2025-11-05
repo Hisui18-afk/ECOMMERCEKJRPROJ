@@ -46,7 +46,15 @@
                     </a>
                 </li>
 
-                <!-- If user is logged in -->
+
+<!-- If user is logged in -->
+<!-- Cart always visible -->
+<li class="nav-item ms-3">
+    <a href="{{ route('cart.view') }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-cart"></i> Cart
+    </a>
+</li>
+
 <!-- If user is logged in -->
 @if(session()->has('user'))
     <li class="nav-item dropdown ms-2">
@@ -59,9 +67,11 @@
             <li><hr class="dropdown-divider"></li>
 
             <li>
-                <a class="dropdown-item text-danger" href="{{ route('logout') }}">
-                    Logout
-                </a>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button class="dropdown-item text-danger">Logout</button>
+                </form>
+
             </li>
         </ul>
     </li>
@@ -80,8 +90,6 @@
         </a>
     </li>
 @endif
-
-
 
 
 

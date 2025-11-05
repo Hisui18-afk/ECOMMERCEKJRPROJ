@@ -9,14 +9,12 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // ✅ Show registration form
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    // ✅ Handle new user registration
-public function register(Request $r)
+    public function register(Request $r)
 {
     $r->validate([
         'name' => 'required',
@@ -31,10 +29,13 @@ public function register(Request $r)
         'role' => 'customer'
     ]);
 
-    Auth::login($user);
+    // ✅ Store user data in session
+    session(['user' => $user]);
 
     return redirect()->route('home');
 }
+
+
 
 
     // ✅ Show login form
@@ -51,15 +52,20 @@ public function login(Request $r)
         'password' => 'required'
     ]);
 
-    if (Auth::attempt($r->only('email', 'password'))) {
-        $user = Auth::user();
+    $user = User::where('email', $r->email)->first();
 
-        return $user->role === 'admin'
-            ? redirect()->route('admin.dashboard')
-            : redirect()->route('home');
+    if (!$user || !Hash::check($r->password, $user->password)) {
+        return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
     }
 
-    return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
+    // ✅ Store logged in user session
+    session(['user' => $user]);
+
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+
+    return redirect()->route('home');
 }
 
 
@@ -67,8 +73,10 @@ public function login(Request $r)
     // ✅ Handle logout
 public function logout()
 {
-    Auth::logout();
+    session()->forget('user');
     return redirect()->route('login.show');
 }
+
+
 
 }

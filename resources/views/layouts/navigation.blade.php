@@ -36,11 +36,12 @@
                     Profile
                 </a>
 
-                <form action="{{ route('logout') }}" method="GET">
-                    <button class="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600">
-                        Logout
-                    </button>
-                </form>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="dropdown-item text-danger">Logout</button>
+                    </form>
+
+
             </div>
         </div>
 
