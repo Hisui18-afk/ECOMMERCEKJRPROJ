@@ -9,6 +9,11 @@ use App\Http\Controllers\Admin\AdminProductController;
 
 Route::get('/', [ProductController::class, 'home'])->name('home');
 
+Route::get('/profile', function () {
+    return view('profile.show');
+})->middleware(['auth'])->name('profile.show');
+
+
 // Product pages
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
@@ -23,7 +28,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Cart
-Route::get('/cart', [ProductController::class, 'cart'])->name('cart');
+Route::get('/cart', [ProductController::class, 'cart'])->name('cart.view');
 Route::get('/cart/add/{id}', [ProductController::class, 'addToCart'])->name('cart.add');
 Route::get('/cart/remove/{id}', [ProductController::class, 'removeFromCart'])->name('cart.remove');
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,25 +16,26 @@ class AuthController extends Controller
     }
 
     // ✅ Handle new user registration
-    public function register(Request $r)
-    {
-        $r->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed'
-        ]);
+public function register(Request $r)
+{
+    $r->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:6|confirmed'
+    ]);
 
-        $user = User::create([
-            'name' => $r->name,
-            'email' => $r->email,
-            'password' => Hash::make($r->password),
-            'role' => 'customer'
-        ]);
+    $user = User::create([
+        'name' => $r->name,
+        'email' => $r->email,
+        'password' => Hash::make($r->password),
+        'role' => 'customer'
+    ]);
 
-        session(['user_id' => $user->id]);
+    Auth::login($user);
 
-        return redirect()->route('home');
-    }
+    return redirect()->route('home');
+}
+
 
     // ✅ Show login form
     public function showLogin()
@@ -42,35 +44,31 @@ class AuthController extends Controller
     }
 
     // ✅ Handle login
-   public function login(Request $r)
+public function login(Request $r)
 {
     $r->validate([
         'email' => 'required|email',
         'password' => 'required'
     ]);
 
-    $user = \App\Models\User::where('email', $r->email)->first();
+    if (Auth::attempt($r->only('email', 'password'))) {
+        $user = Auth::user();
 
-    if (!$user || !\Illuminate\Support\Facades\Hash::check($r->password, $user->password)) {
-        return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
+        return $user->role === 'admin'
+            ? redirect()->route('admin.dashboard')
+            : redirect()->route('home');
     }
 
-    // Store user ID in session
-    session(['user_id' => $user->id]);
-
-    // ✅ Redirect based on role
-    if ($user->role === 'admin') {
-        return redirect()->route('admin.dashboard');
-    } else {
-        return redirect()->route('home');
-    }
+    return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
 }
 
 
+
     // ✅ Handle logout
-    public function logout()
-    {
-        session()->forget('user_id');
-        return redirect()->route('login.show');
-    }
+public function logout()
+{
+    Auth::logout();
+    return redirect()->route('login.show');
+}
+
 }
