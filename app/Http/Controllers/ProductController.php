@@ -21,4 +21,13 @@ class ProductController extends Controller
     {
         return view('products.show', compact('product'));
     }
+
+
+    public function cart()
+{
+    $cart = session()->get('cart', []);
+
+    return view('cart.index', compact('cart'));
+}
+
 }
